@@ -14,15 +14,16 @@
 			height: 100vh;
 			width: 100vw;
 			font-family: Arial, Helvetica, sans-serif;
-			overflow: hidden;
+			overflow: hidden; /* Prevent scrolling */
 			position: relative;
-			background: url('https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjRR_D5KmxXbB5O6qLtAAsuWFMtM7o9TpXBEYc1pZFqn8IRvOniOusERV9Ott1FD43z8qHwNtowRZuzAAcQYovayaManIRtOSC2VQ2DioQwzZcxvAvcLJyQuDvk1pLv9M14VjMF04dlQrZLh9E_NYhjJHHtHuZrxxizAZ_WFRqgWJ25eUMGtlM3zvSmsYw/s947/image%20%282%29.png') no-repeat center center fixed;
-			background-size: cover;
 		}
 
 		/* Remove the bg-img and iframe styles since we're using background image */
 		.bg-img, iframe {
-			display: none;
+			height: 100%;
+			width: 100%;
+			border: none;
+			display: block;
 		}
 
 		/* Add a semi-transparent overlay to make form more readable */

